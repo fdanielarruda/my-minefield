@@ -1,4 +1,4 @@
-import { Button, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { css } from '../assets/css/Css';
 import { useEffect, useState } from "react";
 import { TouchableHighlight } from "react-native";
@@ -6,7 +6,7 @@ import { TouchableHighlight } from "react-native";
 import FieldGame from "../components/FieldGame";
 import Gif from 'react-native-gif';
 
-const numberOfFields = 8;
+const numberOfFields = 10;
 const numberOfBombs = 10;
 
 export default function Game() {
@@ -16,13 +16,12 @@ export default function Game() {
     // MAPA COMPLETO COM BOMBAS E VIZINHOS
     const [fields, setFields] = useState([]);
 
-    // VERIFICA SE O JOGO ESTÁ RODANDO    
+    // VERIFICA SE O JOGO ESTÁ RODANDO
     const [runningGame, setRunningGame] = useState(true);
 
     const [message, setMessage] = useState(false);
     const [win, setWin] = useState(false);
 
-    const [stopwatch, setStopwatch] = useState(0);
     const [countFlags, setCountFlags] = useState(0);
 
     useEffect(() => {
@@ -30,29 +29,30 @@ export default function Game() {
     }, [])
 
     const startGame = () => {
-        setStopwatch(0);
         setMessage(false);
         setWin(false);
         setRunningGame(true);
 
-        let array = [];
+        // DEFININDO AS POSIÇÕES DAS BOMBAS
+        let listBombs = [];
 
-        while (array.length < numberOfBombs) {
+        while (listBombs.length < numberOfBombs) {
             let rowBomb = Math.floor(Math.random() * (numberOfFields - 1));
             let colBomb = Math.floor(Math.random() * (numberOfFields - 1));
 
-            if (!checkInBombs(rowBomb, colBomb, array))
-                array.push([rowBomb, colBomb]);
+            if (!checkInBombs(rowBomb, colBomb, listBombs))
+                listBombs.push([rowBomb, colBomb]);
         }
 
+        // DEFININDO O ARRAY INICIAL COMPLETO
         let fieldsStart = [];
 
         for (let i = 0; i < numberOfFields; i++) {
             let rowFields = [];
 
             for (let j = 0; j < numberOfFields; j++) {
-                if (!checkInBombs(i, j, array))
-                    rowFields.push({ visible: false, value: validateAround(i, j, array), flag: false });
+                if (!checkInBombs(i, j, listBombs))
+                    rowFields.push({ visible: false, value: validateAround(i, j, listBombs), flag: false });
                 else
                     rowFields.push({ visible: false, value: "b", flag: false });
             }
@@ -60,7 +60,7 @@ export default function Game() {
             fieldsStart.push(rowFields);
         }
 
-        setGuardBombs(array);
+        setGuardBombs(listBombs);
         setFields(fieldsStart);
     }
 
@@ -152,16 +152,6 @@ export default function Game() {
         }
     }
 
-    const resetPage = () => {
-        startGame();
-    }
-
-    useEffect(() => {
-        // setTimeout(() => {
-        if (runningGame) setStopwatch(stopwatch + 1)
-        // }, 1000)
-    }, []);
-
     useEffect(() => {
         let count = 0;
         let countHide = 0;
@@ -175,7 +165,7 @@ export default function Game() {
 
         setCountFlags(count);
 
-        if (countHide <= numberOfBombs) {
+        if (countHide > 0 && countHide <= numberOfBombs) {
             setRunningGame(false);
             setWin(true);
         }
@@ -185,7 +175,6 @@ export default function Game() {
         <>
             <View style={css.infoBar}>
                 <Text style={css.infoBarText}>Bombas Restantes: {numberOfBombs - countFlags}</Text>
-                <Text style={css.infoBarText}>Tempo: {stopwatch}</Text>
             </View>
 
             <View style={css.gamePage}>
@@ -235,13 +224,13 @@ export default function Game() {
                     }
 
 
-                    <Pressable style={css.buttonNewGame} onPress={resetPage}>
+                    <Pressable style={css.buttonNewGame} onPress={startGame}>
                         <Text style={css.textNewGame}>NOVO JOGO</Text>
                     </Pressable>
 
                     <Pressable
                         style={[css.buttonNewGame, css.buttonBackGame]}
-                        onPress={() => { setMessage(false); setWin(false) }}
+                        onPress={() => { setMessage(false); setWin(false); }}
                     >
                         <Text style={css.textNewGame}>VOLTAR</Text>
                     </Pressable>
@@ -249,7 +238,7 @@ export default function Game() {
                 : null}
 
             {!message && !win && !runningGame ?
-                <Pressable style={css.buttonNewGame} onPress={resetPage}>
+                <Pressable style={css.buttonNewGame} onPress={startGame}>
                     <Text style={css.textNewGame}>NOVO JOGO</Text>
                 </Pressable>
                 : null}

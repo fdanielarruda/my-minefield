@@ -25,8 +25,8 @@ const css = StyleSheet.create({
 
     gameField: {
         backgroundColor: '#DCDCDC',
-        height: 45,
-        width: 45,
+        height: 35,
+        width: 35,
         borderStyle: 'solid',
         borderColor: 'black',
         borderWidth: 1,
@@ -39,7 +39,8 @@ const css = StyleSheet.create({
     },
 
     textField: {
-        fontSize: 30
+        fontSize: 20,
+        fontWeight: "bold"
     },
 
     infoBar: {
